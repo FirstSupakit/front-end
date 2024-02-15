@@ -1,28 +1,60 @@
-import React from 'react'
+import React, { useState } from 'react';
+import { getMovieSearch } from '../services/MovieService';
 
+const SearchPage = ({ setMovies, setNumberOfMovies }) => {
+  const [searchText, setSearchText] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
-const SearchMovie = ({onChangeForm, searchMovie }) => {
+  const handleSearch = async (e) => {
+    e.preventDefault(); // ป้องกัน default behavior ของ form submission
+  
+    // Check if the search text is empty
+    if (!searchText.trim()) {
+      setErrorMessage('Please enter a movie title for search.');
+      return;
+    }
+  
+    try {
+      const response = await getMovieSearch(searchText);
+      if (response.statusCode === 200) {
+        setMovies(response.data);
+        setNumberOfMovies(response.data.length);
+        setErrorMessage('');
+      } else {
+        setMovies([]);
+        setNumberOfMovies(0);
+        setErrorMessage(response.message || 'No movie found');
+      }
+    } catch (error) {
+      console.error('Error searching movie:', error);
+      setMovies([]);
+      setNumberOfMovies(0);
+      setErrorMessage('Error searching movie');
+    }
+  };
 
+  return (
+    <div>
+      <h2 style={{ backgroundColor: 'lightgray' }}>Movie Search</h2>
+      <form className="d-flex">
+        <input
+          type="text"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          placeholder="Enter movie title"
+          className="form-control mr-2" // Bootstrap class for margin-right
+        />
+        <button
+          onClick={handleSearch}
+          className="btn btn-danger"
+          style={{ backgroundColor: 'green' }}
+        >
+          Search
+        </button>
+      </form>
+      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+    </div>
+  );
+};
 
-    return(
-        <div className="container">
-            <div className="row">
-                <div className="col-md-7 mrgnbtm">
-                <h2>Search Movie</h2>
-                <form>
-                    <div className="row">
-                        <div className="form-group col-md-6">
-                            <input type="text" onChange={(e) => onChangeForm(e)} className="form-control" name="director" id="director" placeholder="Director" />
-                        </div>
-
-                    </div>
-                    <button type="button" onClick= {(e) => searchMovie()} className="btn btn-danger">Search</button>
-                </form>
-                </div>
-            </div>
-
-        </div>
-    )
-}
-
-export default SearchMovie
+export default SearchPage;
