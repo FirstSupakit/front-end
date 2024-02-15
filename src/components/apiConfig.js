@@ -1,7 +1,7 @@
 var apiConfig = {
     development: {
         bearer_token : '1234567890',
-        API_URL : 'http://localhost',
+        API_URL : 'http://lab6.se-rmutl.net',
     },
     production: {
         bearer_token : '1234567890',
